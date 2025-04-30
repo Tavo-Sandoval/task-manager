@@ -1,0 +1,7 @@
+{
+  "build": {
+    "env": {
+      "DATABASE_URL": "postgresql://task_owner:npg_0lWAdZbY2NxO@ep-billowing-sky-a43nezc7-pooler.us-east-1.aws.neon.tech/task?sslmode=require"
+    }
+  }
+}
