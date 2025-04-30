@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/config";
 const prisma = new PrismaClient();
 
 // En Next.js 13.1.1, los handlers de ruta tienen una firma específica
-export async function PUT(request: NextRequest, context: any) {
+export async function PUT(request: NextRequest, context: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, context: any) {
   }
 }
 
-export async function DELETE(request: NextRequest, context: any) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
