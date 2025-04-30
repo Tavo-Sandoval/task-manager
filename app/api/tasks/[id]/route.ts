@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -6,7 +6,7 @@ import { compare } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-const authConfig = {
+const authConfig: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -32,11 +32,11 @@ const authConfig = {
       },
     }),
   ],
-  session: { strategy: 'jwt' as const },
+  session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authConfig);
 
@@ -44,7 +44,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = parseInt(context.params.id);
+    const taskId = parseInt(params.id);
     const { title } = await req.json();
 
     if (!title) {
@@ -65,7 +65,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authConfig);
 
@@ -73,7 +73,7 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = parseInt(context.params.id);
+    const taskId = parseInt(params.id);
 
     if (isNaN(taskId)) {
       return NextResponse.json({ error: "Invalid task ID." }, { status: 400 });
