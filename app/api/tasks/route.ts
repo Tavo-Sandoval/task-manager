@@ -1,20 +1,51 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+const authConfig: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials || !credentials.email || !credentials.password) {
+          return null;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        if (!user) return null;
+
+        const isValid = await compare(credentials.password, user.password);
+        if (!isValid) return null;
+
+        return { id: user.id.toString(), email: user.email };
+      },
+    }),
+  ],
+  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
+};
+
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authConfig);
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const tasks = await prisma.task.findMany({
-      where: { user: { email: session.user.email } },
+      where: { user: { email: session.user.email as string } },
     });
 
     return NextResponse.json(tasks);
@@ -28,7 +59,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authConfig);
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -44,7 +75,7 @@ export async function POST(req: Request) {
       data: {
         title,
         user: {
-          connect: { email: session.user.email },
+          connect: { email: session.user.email as string },
         },
       },
     });
