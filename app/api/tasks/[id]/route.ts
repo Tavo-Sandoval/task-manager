@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { getAuthOptions } from "../../auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
@@ -10,6 +10,7 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
+    const authOptions = getAuthOptions();
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
@@ -42,6 +43,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
+    const authOptions = getAuthOptions();
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {

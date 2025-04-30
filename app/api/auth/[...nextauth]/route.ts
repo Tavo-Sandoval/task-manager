@@ -1,4 +1,3 @@
-
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
@@ -6,7 +5,8 @@ import { compare } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export const authOptions: NextAuthOptions = {
+// Crear la configuración de autenticación pero no exportarla directamente
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -40,3 +40,8 @@ const handler = NextAuth(authOptions);
 
 export const GET = handler;
 export const POST = handler;
+
+// Exportamos la función para obtener la sesión que podemos usar en otros archivos
+export function getAuthOptions() {
+  return authOptions;
+}
