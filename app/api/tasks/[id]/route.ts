@@ -1,14 +1,12 @@
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { PrismaClient } from "@prisma/client";
-import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/config";
 
 const prisma = new PrismaClient();
 
-export async function PUT(
-  req: Request,
-  context: { params: { id: string } }
-) {
+// En Next.js 13.1.1, los handlers de ruta tienen una firma específica
+export async function PUT(request: NextRequest, context: any) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -16,8 +14,9 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = parseInt(context.params.id);
-    const { title } = await req.json();
+    const id = context.params.id;
+    const taskId = parseInt(id);
+    const { title } = await request.json();
 
     if (!title) {
       return NextResponse.json({ error: "Task title is required." }, { status: 400 });
@@ -37,10 +36,7 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  context: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: any) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -48,7 +44,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const taskId = parseInt(context.params.id);
+    const id = context.params.id;
+    const taskId = parseInt(id);
 
     if (isNaN(taskId)) {
       return NextResponse.json({ error: "Invalid task ID." }, { status: 400 });
